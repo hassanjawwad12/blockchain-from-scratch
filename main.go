@@ -8,6 +8,11 @@ import (
 )
 
 type Block struct {
+	Pos       int
+	Data      BookCheckout
+	Timestamp string
+	Hash      string
+	PrevHash  string
 }
 
 type Book struct {
@@ -23,18 +28,22 @@ type Blockchain struct {
 	block []*Block
 }
 
-type BookCheck struct {
+type BookCheckout struct {
+	BookID       string `json:"book_id"`
+	User         string `json:"user"`
+	CheckoutDate string `json:"checkout_date"`
+	IsGenesis    bool   `json:"is_genesis"`
 }
 
-func getBlock(w http.ResponseWriter, r *http.Request) {
+func getBlockchain(w http.ResponseWriter, r *http.Request) {
 }
 
-var Blockchain *Blockchain
+var blockchain *Blockchain
 
 func main() {
 	r := mux.NewRouter()
 
-	r.HandleFunc("/", getBlock).Methods("GET")
+	r.HandleFunc("/", getBlockchain).Methods("GET")
 	// r.HandleFunc("/", writeBlock).Methods("POST")
 	// r.HandleFunc("/new", newBook).Methods("POST")
 
