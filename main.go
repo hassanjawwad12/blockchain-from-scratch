@@ -7,6 +7,30 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type Block struct {
+}
+
+type Book struct {
+	ID          string `json:"id"`
+	Title       string `json:"title"`
+	Author      string `json:"author"`
+	PublishDate string `json:"publish_date"`
+	Isbn        string `json:"isbn"`
+}
+
+type Blockchain struct {
+	// Slice of multiple blocks
+	block []*Block
+}
+
+type BookCheck struct {
+}
+
+func getBlock(w http.ResponseWriter, r *http.Request) {
+}
+
+var Blockchain *Blockchain
+
 func main() {
 	r := mux.NewRouter()
 
