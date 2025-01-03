@@ -1,6 +1,10 @@
 package main
 
 import (
+	"crypto/md5"
+	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
 
@@ -38,6 +42,33 @@ type BookCheckout struct {
 func getBlockchain(w http.ResponseWriter, r *http.Request) {
 }
 
+func newBook(w http.ResponseWriter, r *http.Request) {
+
+	var book Book
+
+	if err := json.NewDecoder(r.Body).Decode(&book); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Error: %s", err)
+		w.Write([]byte("Error decoding book"))
+		return
+	}
+
+	h := md5.New()
+	io.WriteString(h, book.Isbn+book.PublishDate)
+	book.ID = fmt.Sprintf("%x", h.Sum(nil))
+
+	// Convert to JSON
+	resp, err := json.MarshalIndent(book, "", " ")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Error: %s", err)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(resp)
+
+}
+
 var blockchain *Blockchain
 
 func main() {
@@ -45,8 +76,8 @@ func main() {
 
 	r.HandleFunc("/", getBlockchain).Methods("GET")
 	// r.HandleFunc("/", writeBlock).Methods("POST")
-	// r.HandleFunc("/new", newBook).Methods("POST")
+	r.HandleFunc("/new", newBook).Methods("POST")
 
 	log.Println("Listening on port 3000")
-	log.Fatalf(http.ListenAndServe(":3000", r).Error())
+	log.Fatal(http.ListenAndServe(":3000", r).Error())
 }
