@@ -1,2 +1,2 @@
 # blockchain-from-scratch
-A blockchain from scratch
+This code implements a simple blockchain mechanism specifically tailored for book checkouts, allowing for the addition of new records and retrieval of the blockchain contents via HTTP requests.
