@@ -14,6 +14,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// A block in the blockchain
 type Block struct {
 	Pos       int
 	Data      BookCheckout
@@ -22,6 +23,7 @@ type Block struct {
 	PrevHash  string
 }
 
+// Book Details
 type Book struct {
 	ID          string `json:"id"`
 	Title       string `json:"title"`
@@ -30,11 +32,12 @@ type Book struct {
 	Isbn        string `json:"isbn"`
 }
 
+// A custom type that holds a slice of pointers to Block structs.
 type Blockchain struct {
-	// Slice of multiple blocks
 	block []*Block
 }
 
+// Holds data regarding a user's book checkout, including whether it's the genesis block.
 type BookCheckout struct {
 	BookID       string `json:"book_id"`
 	User         string `json:"user"`
@@ -42,6 +45,7 @@ type BookCheckout struct {
 	IsGenesis    bool   `json:"is_genesis"`
 }
 
+// Compute SHA-256 Hash
 func (b *Block) generateHash() {
 	bytes, _ := json.Marshal(b.Data)
 
@@ -52,6 +56,7 @@ func (b *Block) generateHash() {
 	b.Hash = hex.EncodeToString(hash.Sum(nil))
 }
 
+// CreateBlock Creates a new block based on the previous block, initializing its fields and generating its hash.
 func CreateBlock(prevBlock *Block, data BookCheckout) *Block {
 	block := &Block{
 		Pos:       prevBlock.Pos + 1,
@@ -63,6 +68,7 @@ func CreateBlock(prevBlock *Block, data BookCheckout) *Block {
 	return block
 }
 
+// validateHash Validates the hash of the block by regenerating it and comparing it with the provided hash.
 func (b *Block) validateHash(hash string) bool {
 	b.generateHash()
 	if b.Hash != hash {
@@ -71,6 +77,7 @@ func (b *Block) validateHash(hash string) bool {
 	return true
 }
 
+// validBlock Checks if a new block is valid against the previous block’s hash, its own hash, and its position.
 func validBlock(newBlock, prevBlock *Block) bool {
 	if prevBlock.Hash != newBlock.PrevHash {
 		return false
@@ -87,6 +94,7 @@ func validBlock(newBlock, prevBlock *Block) bool {
 	return true
 }
 
+// AddBlock Adds a new BookCheckout record to the blockchain after validating it.
 func (bc *Blockchain) AddBlock(data BookCheckout) {
 
 	prevBlock := bc.block[len(bc.block)-1]
@@ -99,6 +107,7 @@ func (bc *Blockchain) AddBlock(data BookCheckout) {
 
 }
 
+// getBlockchain: Returns the entire blockchain as JSON.
 func getBlockchain(w http.ResponseWriter, r *http.Request) {
 	jbytes, err := json.MarshalIndent(BlockChain.block, "", " ")
 	if err != nil {
@@ -110,6 +119,7 @@ func getBlockchain(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, string(jbytes))
 }
 
+// newBook Handles new book creation by decoding incoming JSON, generating an ID, and responding with the book data as JSON.
 func newBook(w http.ResponseWriter, r *http.Request) {
 
 	var book Book
@@ -136,6 +146,7 @@ func newBook(w http.ResponseWriter, r *http.Request) {
 	w.Write(resp)
 }
 
+// writeBlock Processes incoming book checkout requests and adds them to the blockchain.
 func writeBlock(w http.ResponseWriter, r *http.Request) {
 
 	var bookCheckout BookCheckout
@@ -161,6 +172,7 @@ func writeBlock(w http.ResponseWriter, r *http.Request) {
 
 var BlockChain *Blockchain
 
+// Functions to initialize the blockchain with a genesis block.
 func GenesisBlock() *Block {
 	return CreateBlock(&Block{}, BookCheckout{IsGenesis: true})
 }
